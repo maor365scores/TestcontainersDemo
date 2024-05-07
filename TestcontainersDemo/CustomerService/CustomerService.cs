@@ -58,4 +58,61 @@ public sealed class CustomerService
         command.Connection?.Open();
         command.ExecuteNonQuery();
     }
+
+    public Customer? GetCustomerById(int id)
+    {
+        using var connection = _dbConnectionProvider.GetConnection();
+        using var command = connection.CreateCommand();
+
+        var idParam = command.CreateParameter();
+        idParam.ParameterName = "@id";
+        idParam.Value = id;
+
+        command.CommandText = "SELECT id, name FROM customers WHERE id = @id";
+        command.Parameters.Add(idParam);
+        command.Connection?.Open();
+
+        using var dataReader = command.ExecuteReader();
+        if (!dataReader.Read())
+        {
+            return null;
+        }
+
+        var customerId = dataReader.GetInt64(0);
+        var customerName = dataReader.GetString(1);
+        return new Customer(customerId, customerName);
+
+    }
+
+    public void Update(Customer customer)
+    {
+        using var connection = _dbConnectionProvider.GetConnection();
+        using var command = connection.CreateCommand();
+
+        // Set up the parameters for the command to avoid SQL injection.
+        var idParam = command.CreateParameter();
+        idParam.ParameterName = "@id";
+        idParam.Value = customer.Id;
+
+        var nameParam = command.CreateParameter();
+        nameParam.ParameterName = "@name";
+        nameParam.Value = customer.Name;
+
+        // Write the SQL command text to update the customer.
+        command.CommandText = "UPDATE customers SET name = @name WHERE id = @id";
+        command.Parameters.Add(idParam);
+        command.Parameters.Add(nameParam);
+
+        command.Connection?.Open();
+
+        // Execute the command.
+        int affectedRows = command.ExecuteNonQuery();
+
+        // Optionally, you can check how many rows were affected.
+        if (affectedRows == 0)
+        {
+            throw new Exception("No customer was updated. Customer not found.");
+        }
+    }
+
 }
