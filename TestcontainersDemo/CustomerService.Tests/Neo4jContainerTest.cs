@@ -3,13 +3,13 @@ using Testcontainers.Neo4j;
 
 namespace CustomerService.Tests;
 
-public sealed class Neo4jContainerTest : IAsyncLifetime
+public sealed class Neo4JContainerTest : IAsyncLifetime
 {
 	private readonly Neo4jContainer _neo4JContainer
 		= new Neo4jBuilder().Build();
 
 	[Fact]
-	public async Task CanReadNeo4jDatabase()
+	public async Task CanReadNeo4JDatabase()
 	{
 		const string database = "neo4j";
 
